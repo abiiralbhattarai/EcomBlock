@@ -4,8 +4,6 @@ coverage
 coverage.json
 typechain
 coverage.config.js
-*.json
-*.config.js
 
 #Hardhat files
 cache
