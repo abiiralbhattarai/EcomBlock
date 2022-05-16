@@ -10,11 +10,10 @@ contract NftEcomBlock is ERC721Enumerable, Ownable {
 
     string public baseURI;
     string public baseExtension = ".json";
-    uint256 public nftCost = 0.05 ether;
-    uint256 public maxnftSupply = 100;
+    uint256 public pricePerNft = 0.05 ether;
+    uint256 public maxSupply = 100;
     bool public onlyWhitelisted = true;
-    address[] public whitelistedAddresses;
-    mapping(address => uint256) public nftAllowed;
+    mapping(address => uint8) private whiteListedAddresses;
 
     constructor(string memory _name, string memory _symbol)
         // string memory _initBaseURI
@@ -29,11 +28,26 @@ contract NftEcomBlock is ERC721Enumerable, Ownable {
 
     // mint function
     function mint(uint256 _mintAmount) public payable {
-        // uint256 supply = totalSupply();
-        // require(_mintAmount > 0, "You need to mint at least 1 NFT");
-        // require(supply + _mintAmount <= maxSupply, "max NFT limit exceeded");
-        // require(isWhiteListed(msg.sender), "You are not whitelisted");
-        // uint256 MintedCount = addressMintedBalance[msg.sender];
-        // require(MintedCount + _mintAmount <= nftPerAddressLimit, "NFT allowe to mint per address exceeded");
+        uint256 tsupply = totalSupply();
+        require(
+            _mintAmount <= whiteListedAddresses[msg.sender],
+            "Exceeded max available to purchase"
+        );
+        require(_mintAmount > 0, "You need to mint at least One NFT");
+        require(tsupply + _mintAmount <= maxSupply, "NFT supply exceeded");
+        require(
+            pricePerNft * _mintAmount <= msg.value,
+            "Ether value sent is not correct"
+        );
+    }
+
+    //setting  whitelist addresses and number of token they can mint
+    function setwhiteListedAddresses(
+        address[] calldata addresses,
+        uint8 numAllowedToMint
+    ) public onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) {
+            whiteListedAddresses[addresses[i]] = numAllowedToMint;
+        }
     }
 }
