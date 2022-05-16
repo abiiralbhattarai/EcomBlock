@@ -11,6 +11,7 @@ contract NftEcomBlock is ERC721Enumerable, Ownable {
     string public baseURI;
     string public baseExtension = ".json";
     uint256 public pricePerNft = 0.05 ether;
+    bool public paused = false; //to pause the contract when needed
     uint256 public maxSupply = 100;
     bool public onlyWhitelisted = true;
     mapping(address => uint8) private whiteListedAddresses;
@@ -28,6 +29,7 @@ contract NftEcomBlock is ERC721Enumerable, Ownable {
 
     // mint function
     function mint(uint256 _mintAmount) public payable {
+        require(!paused, "The contract is paused at the moment");
         uint256 tsupply = totalSupply();
         require(
             _mintAmount <= whiteListedAddresses[msg.sender],
