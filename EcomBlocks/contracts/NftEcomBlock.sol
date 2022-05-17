@@ -31,16 +31,19 @@ contract NftEcomBlock is ERC721Enumerable, Ownable {
     function mint(uint256 _mintAmount) public payable {
         require(!paused, "The contract is paused at the moment");
         uint256 tsupply = totalSupply();
-        require(
-            _mintAmount <= whiteListedAddresses[msg.sender],
-            "Exceeded max available to purchase"
-        );
+        // require(
+        //     _mintAmount <= whiteListedAddresses[msg.sender],
+        //     "Exceeded max available to purchase"
+        // );
         require(_mintAmount > 0, "You need to mint at least One NFT");
         require(tsupply + _mintAmount <= maxSupply, "NFT supply exceeded");
         require(
             pricePerNft * _mintAmount <= msg.value,
             "Ether value sent is not correct"
         );
+        for (uint256 i = 1; i <= _mintAmount; i++) {
+            _safeMint(msg.sender, tsupply + i);
+        }
     }
 
     //setting  whitelist addresses and number of token they can mint
@@ -51,5 +54,16 @@ contract NftEcomBlock is ERC721Enumerable, Ownable {
         for (uint256 i = 0; i < addresses.length; i++) {
             whiteListedAddresses[addresses[i]] = numAllowedToMint;
         }
+    }
+
+    //function to pause contract
+    function pause(bool _state) public onlyOwner {
+        paused = _state;
+    }
+
+    //function withdraw
+    function withdraw() public payable onlyOwner {
+        (bool os, ) = payable(owner()).call{value: address(this).balance}("");
+        require(os);
     }
 }
